@@ -1,0 +1,12 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                            ignore-files                             
+# 
+# Add the filenames supplied as arguments to the set of files
+# ignored by the version control system.  Should be idempotent.
+#---------------------------------------------------------------------
+
+test -z "${FW_TRACE}" || set -x
+
+exit 0

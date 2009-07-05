@@ -1,0 +1,55 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                        init-fw-pkgin-config                         
+# 
+# This is called after revision/init has been called,
+# after revision/add-dir has been called on fw-pkgin, and
+# after revision/add-files has been called on the contents
+# of fw-pkgin.  At this point, the fw-pkgin/config file
+# exists and this is the opportunity to persist any state
+# by modifying fw-pkgin/config.
+# 
+# It is called with same arguments as revision/init.
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+#                           chicken and egg                           
+#---------------------------------------------------------------------
+
+test -f "${FW_ROOT}/share/fw/sh/fw-find.sh" && fws="${FW_ROOT}/share/fw/sh/fw-find.sh"
+test -f "fw/sh/fw-find.sh" && fws="fw/sh/fw-find.sh"
+test -f "fw.local/sh/fw-find.sh" && fws="fw.local/sh/fw-find.sh"
+test ! -z "$fws" || {
+  echo "revision/__REVISION_TYPE__/init-fw-pkgin-config: fatal: can't locate fw-find.sh" 1>&2
+  exit 1
+}
+
+. "$fws"
+
+#---------------------------------------------------------------------
+#                              routines                               
+#---------------------------------------------------------------------
+
+fw_source "revision/__REVISION_TYPE__/init-fw-pkgin-config" "sh/fatal.sh"
+fw_source "revision/__REVISION_TYPE__/init-fw-pkgin-config" "sh/parse-args.sh"
+fw_source "revision/__REVISION_TYPE__/init-fw-pkgin-config" "sh/validate-args.sh"
+
+#---------------------------------------------------------------------
+#                                main                                 
+#---------------------------------------------------------------------
+
+# example: save init variable myvar into fw-pkgin/config for later
+
+# parse_args "revision/__REVISION_TYPE__/init-fw-pkgin-config" "$@"
+# 
+# validate_args "revision/__REVISION_TYPE__/init-fw-pkgin-config" "myvar" ""
+# 
+# (
+#   cd fw-pkgin &&
+#   cat <<EOD >> config
+#
+# # a comment written to fw-pkgin/config
+# MYVAR="$myvar"
+# EOD
+# ) || fatal "revision/__REVISION_TYPE__/init-fw-pkgin-config"

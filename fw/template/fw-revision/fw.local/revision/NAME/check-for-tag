@@ -1,0 +1,42 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                            check-for-tag                            
+# 
+# Given a tag (--tag), determine if the tag exists or not.
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+#                           chicken and egg                           
+#---------------------------------------------------------------------
+
+test -f "${FW_ROOT}/share/fw/sh/fw-find.sh" && fws="${FW_ROOT}/share/fw/sh/fw-find.sh"
+test -f "fw/sh/fw-find.sh" && fws="fw/sh/fw-find.sh"
+test -f "fw.local/sh/fw-find.sh" && fws="fw.local/sh/fw-find.sh"
+test ! -z "$fws" || {
+  echo "revision/__REVISION_TYPE__/check-for-tag: fatal: can't locate fw-find.sh" 1>&2
+  exit 1
+}
+
+. "$fws"
+
+#---------------------------------------------------------------------
+#                              routines                               
+#---------------------------------------------------------------------
+
+fw_source "revision/__REVISION_TYPE__/check-for-tag" "sh/fatal.sh"
+fw_source "revision/__REVISION_TYPE__/check-for-tag" "sh/parse-args.sh"
+fw_source "revision/__REVISION_TYPE__/check-for-tag" "sh/validate-args.sh"
+
+#---------------------------------------------------------------------
+#                                main                                 
+#---------------------------------------------------------------------
+
+parse_args "revision/__REVISION_TYPE__/check-for-tag" "$@"
+
+validate_args "revision/__REVISION_TYPE__/check-for-tag" "tag" ""
+
+# exit 1 => tag exists
+# exit 0 => tag does not exist
+
+exit 1

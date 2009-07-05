@@ -1,0 +1,10 @@
+# put whatever (auto)make commands here, they will be included from Makefile.am
+
+check_SCRIPTS = 	\
+  test-revision
+
+check_DATA =		\
+  $(check_SCRIPTS:%=.%.script_ok)
+
+TESTS =			\
+  $(check_SCRIPTS)

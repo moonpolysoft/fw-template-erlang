@@ -1,0 +1,31 @@
+SUBDIRS += src doc tests
+
+# put whatever (auto)make commands here, they will be included from Makefile.am
+
+dist_template_DATA = 			\
+  Makefile_dot_am			\
+  Makefile.otp   			\
+  configure.ac				\
+  find_modules.erl			\
+  find_modules.beam			\
+  find_registered.erl			\
+  find_registered.beam			\
+  find_start_module.erl			\
+  find_start_module.beam		\
+  oldrecord_trans.erl			\
+  oldrecord_trans.beam			\
+  vsn_trans.erl				\
+  vsn_trans.beam
+
+dist_template_SCRIPTS +=		\
+  find-modules.sh			\
+  find-registered.sh 			\
+  find-start-module.sh 			\
+  make-app-file				\
+  make-post-install			\
+  make-pre-remove			\
+  make-post-remove
+
+ERLCFLAGS = +debug_info 
+
+include Makefile.otp

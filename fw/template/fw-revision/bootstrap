@@ -1,0 +1,74 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                              bootstrap                              
+# 
+# This will be called by the template bootstrap function, which is
+# itself called by fw-bootstrap, which is in turn invoked by the
+# bootstrap executable deposited at the top of the source project.
+# It is intended for running any setup activity required prior to
+# building.
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+#                           chicken and egg                           
+#---------------------------------------------------------------------
+
+test -f "${FW_ROOT}/share/fw/sh/fw-find.sh" && fws="${FW_ROOT}/share/fw/sh/fw-find.sh"
+test -f "fw/sh/fw-find.sh" && fws="fw/sh/fw-find.sh"
+test -f "fw.local/sh/fw-find.sh" && fws="fw.local/sh/fw-find.sh"
+test ! -z "$fws" || {
+  echo "fw-revision/bootstrap: fatal: can't locate fw-find.sh" 1>&2
+  exit 1
+}
+
+. "$fws"
+
+#---------------------------------------------------------------------
+#                              routines                               
+#---------------------------------------------------------------------
+
+fw_source "fw-revision/bootstrap" "sh/bootstrap-util.sh"
+fw_source "fw-revision/bootstrap" "sh/fw-exec.sh"
+fw_source "fw-revision/bootstrap" "sh/parse-args.sh"
+fw_source "fw-revision/bootstrap" "sh/validate-args.sh"
+
+#---------------------------------------------------------------------
+#                                main                                 
+#---------------------------------------------------------------------
+
+parse_args "fw-revision/bootstrap" "$@"
+
+validate_args "fw-revision/bootstrap" "revision_type" ""
+
+topdir="`pwd`"
+
+(
+  cd "fw.local/revision" && {
+    test -h NAME || ln -sf "$revision_type" NAME
+  }
+) || fatal "fw-revision/bootstrap"
+
+for dir in tests fw.local fw.local/revision fw.local/revision/NAME .
+  do
+    case "$dir" in
+      *NAME)
+        targetdir="fw.local/revision/$revision_type";
+        ;;
+      *)
+        targetdir="$dir"
+        ;;
+    esac
+
+    for x in Makefile_dot_am configure.ac
+      do
+        target=`echo "$x" | perl -pe 's/_dot_am/.am/;'`
+
+        bootstrap_link_optional "template/fw-revision/$dir/$x"          \
+                                "$targetdir"                            \
+                                "$target"                               \
+        || fatal "fw-revision/bootstrap"
+      done
+  done
+
+fw_exec "build/automake/bootstrap" "$@"

@@ -1,0 +1,15 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                               add-dir                               
+# 
+# Takes one argument which is the directory to be added to version
+# control (which should have already been created).  Should be 
+# idempotent.
+#---------------------------------------------------------------------
+
+test -z "${FW_TRACE}" || set -x
+
+test -d "$1" || exit 1
+
+exit 0

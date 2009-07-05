@@ -1,0 +1,13 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                             remove-files                             
+# 
+# Takes arguments which are the files to be removed from
+# version control (which should already have been deleted
+# locally).  Should be idempotent.
+#---------------------------------------------------------------------
+
+test -z "${FW_TRACE}" || set -x
+
+exit 0

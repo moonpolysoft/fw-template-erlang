@@ -1,0 +1,153 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                                init                                 
+# 
+# This is called by the template init method, which is itself called
+# by fw-init when a project is being initialized.  It is intended
+# for creating files in the project that will remain in the project
+# and are owned by the project.  Creation of (symlinks to) files
+# owned by the build method should be done at bootstrap time.
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+#                           chicken and egg                           
+#---------------------------------------------------------------------
+
+which perl >/dev/null 2>/dev/null || {
+  echo "fw-revision/init: fatal: can't locate perl" 1>&2
+  exit 1
+}
+
+if test -z "${FW_ROOT}"
+  then
+    FW_ROOT=`echo "$0" | perl -pe 's%fw/template/fw-revision/init$%%;'`
+    export FW_ROOT
+  fi
+
+test -f "${FW_ROOT}/share/fw/sh/fw-find.sh" || {
+  echo "fw-revision/init: fatal: can't determine FW_ROOT" 1>&2
+  echo "fw-revision/init: please set the environment variable" 1>&2
+  exit 1
+}
+
+. "${FW_ROOT}/share/fw/sh/fw-find.sh"
+
+#---------------------------------------------------------------------
+#                              routines                               
+#---------------------------------------------------------------------
+
+fw_source "fw-revision/init" "sh/fw-exec.sh"
+fw_source "fw-revision/init" "sh/parse-args.sh"
+fw_source "fw-revision/init" "sh/validate-args.sh"
+
+#---------------------------------------------------------------------
+#                                main                                 
+#---------------------------------------------------------------------
+
+fw_exec "build/automake/init" "$@" || fatal "fw-revision/init"
+
+parse_args "fw-revision/init" "$@"
+
+validate_args "fw-revision/init" "name revision_type revision" "revision"
+
+topdir="`pwd`"
+
+for dir in tests fw.local fw.local/revision fw.local/revision/NAME
+  do
+    case "$dir" in
+      *NAME)
+        dirtarget="fw.local/revision/$revision_type"
+        mkdir "$dirtarget" || fatal "fw-revision/init"
+        fw_exec "revision/$revision/add-dir" "$dirtarget" || fatal "fw-revision/init"
+        ln -sf "$revision_type" "$dir" || fatal "fw-revision/init"
+        ;;
+      *)
+        mkdir "$dir" || fatal "fw-revision/init"
+        fw_exec "revision/$revision/add-dir" "$dir" || fatal "fw-revision/init"
+        ;;
+    esac
+
+    for x in Makefile.am.local
+      do
+        fw_find "template/fw-revision/$dir/$x" file
+        test -z "$file" && fatal "fw-revision/init"
+        cp -f "$file" "$dir" || fatal "fw-revision/init"
+        chmod +w "$dir/$x" || fatal "fw-revision/init"
+      done
+
+    for x in add-dir                    \
+             add-files                  \
+             check-for-tag              \
+             check-up-to-date           \
+             detect                     \
+             ignore-files               \
+             init                       \
+             init-fw-pkgin-config       \
+             remove-files               \
+             tag                        \
+             test-revision
+      do
+        fw_find "template/fw-revision/$dir/$x" file
+        test -z "$file" || {
+          cp -f "$file" "$dir/$x" || fatal "fw-revision/init"
+          chmod +w "$dir/$x" || fatal "fw-revision/init"
+          perl -i                                       	        \
+               -pe "s/__REVISION_TYPE__/$revision_type/g;
+                    s/__REVISION_TYPE_UC__/\U$revision_type\E/g;
+                    s/__PACKAGE_NAME__/$name/g;"                        \
+               "$dir/$x" || fatal "fw-revision/init"
+        }
+      done
+
+    for x in add-dir                    \
+             add-files                  \
+             check-for-tag              \
+             check-up-to-date           \
+             detect                     \
+             ignore-files               \
+             init                       \
+             init-fw-pkgin-config       \
+             remove-files               \
+             tag
+      do
+        target="$x"
+        test ! -e "$dir/$target" ||                                     \
+        chmod +x "$dir/$target" ||                                      \
+        fatal "fw-revision/init"
+      done
+
+    (
+      cd "$dir" &&                                              \
+      fw_exec "revision/$revision/add-files"                    \
+        add-dir                                                 \
+        add-files                                               \
+        check-for-tag                                           \
+        check-up-to-date                                        \
+        detect                                                  \
+        ignore-files                                            \
+        init                                                    \
+        init-fw-pkgin-config                                    \
+        Makefile.am.local                                       \
+        remove-files                                            \
+        tag                                                     \
+        test-revision &&                                        \
+      fw_exec "revision/$revision/ignore-files"                 \
+        Makefile                                                \
+        Makefile.in                                             \
+        '.*.script_ok'                                          \
+    ) || fatal "fw-revision/init"
+  done
+
+(
+  cd fw.local/revision && fw_exec "revision/$revision/ignore-files" NAME
+) || fatal "fw-revision/init"
+
+(
+  cd tests &&                                                   \
+  fw_exec "revision/$revision/ignore-files"                     \
+    fw.local                                                    \
+    share                                                       \
+    test-revision.out                                           \
+    tmp                                                         \
+) || fatal "fw-revision/init"

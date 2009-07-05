@@ -1,0 +1,34 @@
+SUBDIRS = 
+
+revisiondir = $(prefix)/share/fw/revision/@FW_REVISION_REVISION_TYPE@
+
+dist_revision_SCRIPTS =			\
+  add-dir				\
+  add-files				\
+  check-for-tag				\
+  check-up-to-date			\
+  detect				\
+  ignore-files				\
+  init					\
+  init-fw-pkgin-config			\
+  remove-files				\
+  tag
+
+install-data-hook:
+	find "$(DESTDIR)$(revisiondir)" -type f | xargs chmod -w
+
+noinst_DATA =				\
+  $(dist_revision_SCRIPTS:%=.%.script_ok)
+
+CLEANFILES =				\
+  $(wildcard .*.script_ok)
+
+MAINTAINERCLEANFILES = 			\
+  Makefile.am				\
+  Makefile.in
+
+EXTRA_DIST =
+
+include $(top_srcdir)/fw/build/automake/check-shell.am
+include $(top_srcdir)/fw/build/automake/gnu-make-check.am
+include $(top_srcdir)/fw.local/revision/NAME/Makefile.am.local

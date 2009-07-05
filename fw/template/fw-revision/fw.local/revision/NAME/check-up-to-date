@@ -1,0 +1,15 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                          check-up-to-date                           
+# 
+# Takes no arguments.  Determine whether the project starting from
+# the current directory is up-to-date with the repository.
+#---------------------------------------------------------------------
+
+test -z "${FW_TRACE}" || set -x
+
+# exit 1 => not up to date
+# exit 0 => up to date
+
+exit 1

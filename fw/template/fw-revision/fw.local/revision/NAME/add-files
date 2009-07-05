@@ -1,0 +1,12 @@
+#! /bin/sh
+
+#---------------------------------------------------------------------
+#                              add-files                               
+# 
+# Takes arguments which are the files to be added to version control
+# (which should already have been created).  Should be idempotent.
+#---------------------------------------------------------------------
+
+test -z "${FW_TRACE}" || set -x
+
+exit 0
