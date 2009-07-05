@@ -124,6 +124,8 @@ for dir in doc src tests
 (
   cd fw-pkgin &&
   cat <<'EOD' >> config
+# uncomment and set manually for native hipe compilation
+# ERLCFLAGS="-smp +native +\"{hipe,[o3,verbose]}\""
 
 # uncomment and set manually if autodetection of modules is incorrect
 # FW_ERL_APP_MODULES=""
